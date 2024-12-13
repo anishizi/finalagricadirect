@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "jsx": "preserve", // pour React 17+
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "ES2017",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".", // Assurez-vous que baseUrl est bien défini
+    "paths": {
+      "@/*": ["./*"] // Définit l'alias @ comme pointant vers le répertoire racine
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
