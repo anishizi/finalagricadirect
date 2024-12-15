@@ -52,14 +52,28 @@ const Credit = () => {
 
   const calculateRemainingAndPaid = (credit: CreditType) => {
     const startDate = new Date(credit.credits.start_date);
-    const elapsedMonths = Math.floor((new Date().getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
-    const monthsPaid = Math.min(elapsedMonths, credit.credits.duration_months);
-    const amountPaid = monthsPaid * credit.credits.monthly_payment;
-    const remainingAmount = credit.credits.total_due - amountPaid;
-    const remainingMonths = credit.credits.duration_months - monthsPaid;
-
+    const currentDate = new Date();
+  
+    // Si la date actuelle est avant la date de début, aucun paiement n'est dû
+    if (currentDate < startDate) {
+      return { monthsPaid: 0, amountPaid: 0, remainingAmount: credit.credits.total_due, remainingMonths: credit.credits.duration_months };
+    }
+  
+    // Calcule les mois écoulés depuis la date de début (en considérant le jour de début)
+    const diffInMonths =
+      currentDate.getFullYear() * 12 +
+      currentDate.getMonth() -
+      (startDate.getFullYear() * 12 + startDate.getMonth());
+  
+    const elapsedMonths = Math.max(diffInMonths, 0); // S'assure qu'il n'y a pas de valeur négative
+    const monthsPaid = Math.min(elapsedMonths, credit.credits.duration_months); // Limite aux mensualités totales
+    const amountPaid = monthsPaid * credit.credits.monthly_payment; // Montant payé jusqu'à présent
+    const remainingAmount = Math.max(credit.credits.total_due - amountPaid, 0); // Montant restant
+    const remainingMonths = Math.max(credit.credits.duration_months - monthsPaid, 0); // Mensualités restantes
+  
     return { monthsPaid, amountPaid, remainingAmount, remainingMonths };
   };
+  
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-50 p-2">
