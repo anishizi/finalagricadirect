@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useRouter } from "next/router";
+import PasswordModal from "../components/PasswordModal";
 
 const Gestionutilisateur = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [newPassword, setNewPassword] = useState<{ [key: string]: string }>({});
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -63,6 +66,36 @@ const Gestionutilisateur = () => {
     }
   };
 
+  const handlePasswordUpdate = async (password: string) => {
+    if (!selectedUser) return;
+    
+    await updateUserPassword(selectedUser.id, password);
+    setSelectedUser(null); // Ferme le modal
+  };
+
+  const updateUserPassword = async (userId: string, password: string) => {
+    try {
+      const response = await fetch('/api/update-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de la mise à jour du mot de passe');
+      }
+
+      alert('Mot de passe mis à jour avec succès');
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert(error.message || 'Erreur lors de la mise à jour du mot de passe');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -83,9 +116,10 @@ const Gestionutilisateur = () => {
               <thead className="bg-gray-100">
                 <tr>
                   <th className="px-2 py-1 border w-1/6 truncate">Nom</th>
-                  <th className="px-2 py-1 border w-1/3 truncate">Email</th>
+                  <th className="px-2 py-1 border w-1/4 truncate">Email</th>
                   <th className="px-2 py-1 border w-1/6 text-center">Approuvé</th>
                   <th className="px-2 py-1 border w-1/6 text-center">Rôle</th>
+                  <th className="px-2 py-1 border w-1/4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,15 +197,27 @@ const Gestionutilisateur = () => {
                         )}
                       </div>
                     </td>
+                    <td className="px-2 py-1 border text-center">
+                      <button
+                        onClick={() => setSelectedUser(userItem)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600"
+                      >
+                        Modifier MDP
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
+          <PasswordModal
+            isOpen={!!selectedUser}
+            onClose={() => setSelectedUser(null)}
+            username={selectedUser?.username || ''}
+            onSubmit={handlePasswordUpdate}
+          />
         </div>
       )}
-
-      
     </div>
   );
 };
